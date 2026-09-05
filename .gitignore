@@ -1,0 +1,21 @@
+# .NET build output
+bin/
+obj/
+*.user
+
+# Local dev database files
+*.mdf
+*.ldf
+
+# IDE
+.vs/
+.vscode/
+*.suo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Not for the public repo — internal/personal, not code
+LabPulse-Team-Knowledge-Base.docx
+predictive maintenance/WhatsApp Image*.jpeg

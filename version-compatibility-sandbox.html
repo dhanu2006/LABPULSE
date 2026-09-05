@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Version Compatibility Sandbox · LabPulse Twin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1D4ED8; --blue-d:#1E3A8A; --blue-l:#EFF4FF; --blue-b:#C7D8FB;
+  --green:#15803D; --green-l:#EDF8F0; --green-b:#BFE3CB;
+  --amber:#B45309; --amber-l:#FDF5E7; --amber-b:#F0DBB4;
+  --red:#B91C1C; --red-l:#FDF1F1; --red-b:#F3C9C9;
+  --ink:#111827; --text:#374151; --muted:#6B7280; --faint:#9CA3AF;
+  --line:#E5E7EB; --line2:#D1D5DB; --bg:#F4F6F8; --card:#fff;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sh:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+h1,h2,h3,h4{color:var(--ink);line-height:1.3}
+.mono{font-family:var(--mono)}
+
+/* ---------- app shell ---------- */
+.top{background:var(--card);border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex:none}
+.logo svg{width:19px;height:19px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.brand h1{font-size:16.5px;font-weight:600}
+.brand p{font-size:12.5px;color:var(--muted)}
+.topmeta{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.tagpill{font-size:12px;padding:5px 11px;border-radius:100px;border:1px solid var(--line2);color:var(--muted);background:var(--bg)}
+.tagpill b{color:var(--text);font-weight:600}
+
+.wrap{max-width:1240px;margin:0 auto;padding:22px}
+.sec{margin-bottom:22px}
+.sech{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:11px;flex-wrap:wrap}
+.sech h2{font-size:13px;font-weight:600;color:var(--muted)}
+.sech .hint{font-size:12.5px;color:var(--faint)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+
+/* ---------- setup row ---------- */
+.setup{display:grid;grid-template-columns:1.15fr 1fr auto;gap:16px;align-items:stretch}
+.setup .card{padding:16px 18px}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:7px}
+.vrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.vrow:last-child{margin-bottom:0}
+.varrow{color:var(--faint);font-size:15px}
+.vchip{font-family:var(--mono);font-size:13px;font-weight:500;padding:6px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--bg);color:var(--ink)}
+.vchip.cur{background:var(--green-l);border-color:var(--green-b);color:var(--green)}
+.vchip.cand{background:var(--blue-l);border-color:var(--blue-b);color:var(--blue-d)}
+select{font-family:var(--mono);font-size:13px;padding:7px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+select:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.gold{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gitem .gv{font-size:15.5px;font-weight:600;color:var(--ink)}
+.gitem .gl{font-size:12px;color:var(--muted);margin-top:1px}
+.runbox{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:210px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:9px;font-size:14.5px;font-weight:600;border:1px solid var(--line2);background:var(--card);color:var(--ink);transition:background .15s ease}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-d)}
+.btn.primary:disabled{background:var(--line2);border-color:var(--line2);color:var(--faint);cursor:default}
+.btn.warn{background:var(--red-l);border-color:var(--red-b);color:var(--red)}
+.btn.sm{padding:8px 12px;font-size:13px}
+.btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nohw{font-size:12px;color:var(--muted);text-align:center;line-height:1.45}
+
+/* ---------- progress ---------- */
+.prog{padding:16px 18px}
+.pbar{height:7px;border-radius:100px;background:var(--line);overflow:hidden;margin:10px 0 9px}
+.pbar i{display:block;height:100%;background:var(--blue);width:0;transition:width .25s linear}
+.plog{font-family:var(--mono);font-size:12.5px;color:var(--muted);min-height:19px}
+
+/* ---------- verdict banner ---------- */
+.verdict{padding:18px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-left:4px solid}
+.verdict.mixed{border-color:var(--amber);background:var(--amber-l)}
+.verdict.pass{border-color:var(--green);background:var(--green-l)}
+.verdict.fail{border-color:var(--red);background:var(--red-l)}
+.verdict .vt{flex:1;min-width:260px}
+.verdict h3{font-size:17px;font-weight:600;margin-bottom:4px}
+.verdict p{font-size:13.5px;color:var(--text);line-height:1.5}
+.counts{display:flex;gap:22px}
+.count .cn{font-size:22px;font-weight:600;line-height:1}
+.count .cl{font-size:11.5px;color:var(--muted);margin-top:3px}
+.cn.ok{color:var(--green)} .cn.cond{color:var(--amber)} .cn.bad{color:var(--red)}
+.vacts{display:flex;gap:9px;flex-wrap:wrap}
+
+/* ---------- matrix ---------- */
+.mtable{width:100%;border-collapse:collapse}
+.mtable th{text-align:left;font-size:11.5px;font-weight:600;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mtable td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+.mtable tr:last-child td{border-bottom:none}
+.mtable tbody tr{cursor:pointer;transition:background .12s ease}
+.mtable tbody tr:hover{background:var(--bg)}
+.mtable tbody tr.sel{background:var(--blue-l)}
+.iid{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
+.isub{font-size:12px;color:var(--muted);margin-top:2px}
+.cfg{font-family:var(--mono);font-size:12px;color:var(--text)}
+.grp{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--line2);color:var(--muted)}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:5px 11px;border-radius:100px;border:1px solid}
+.st .d{width:7px;height:7px;border-radius:50%;flex:none}
+.st.ok{color:var(--green);background:var(--green-l);border-color:var(--green-b)} .st.ok .d{background:var(--green)}
+.st.cond{color:var(--amber);background:var(--amber-l);border-color:var(--amber-b)} .st.cond .d{background:var(--amber)}
+.st.bad{color:var(--red);background:var(--red-l);border-color:var(--red-b)} .st.bad .d{background:var(--red)}
+.st.pin{color:var(--blue-d);background:var(--blue-l);border-color:var(--blue-b)} .st.pin .d{background:var(--blue)}
+.why{font-size:12.5px;color:var(--muted);max-width:270px;line-height:1.45}
+
+/* ---------- detail ---------- */
+.detail{display:grid;grid-template-columns:1.05fr 1fr;gap:16px}
+.dcard{padding:18px}
+.dhead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.dhead h3{font-size:16px;font-weight:600}
+.dhead .ds{font-size:12.5px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.metrics{width:100%;border-collapse:collapse;font-size:13px}
+.metrics th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);padding:8px 8px 8px 0;border-bottom:1px solid var(--line)}
+.metrics th.num,.metrics td.num{text-align:right;font-family:var(--mono);white-space:nowrap}
+.metrics td{padding:9px 8px 9px 0;border-bottom:1px solid var(--line)}
+.metrics tr:last-child td{border-bottom:none}
+.metrics .mn{color:var(--ink);font-weight:500}
+.metrics .crit{font-size:11.5px;color:var(--faint);font-family:var(--mono)}
+.dv{font-weight:600}
+.dv.ok{color:var(--green)} .dv.cond{color:var(--amber)} .dv.bad{color:var(--red)}
+.chart{width:100%;height:auto;display:block;margin-bottom:10px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.legend i{display:inline-block;width:16px;height:2.5px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.legend .g i{background:var(--blue)} .legend .c i{background:var(--red)}
+.zoomnote{font-size:12.5px;color:var(--muted);line-height:1.5;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+.zoomnote b{color:var(--ink);font-weight:600}
+.dacts{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+
+/* ---------- modal ---------- */
+.scrim{position:fixed;inset:0;background:rgba(17,24,39,.5);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%) scale(.98);opacity:0;pointer-events:none;background:var(--card);border-radius:14px;z-index:50;width:min(760px,92vw);max-height:88vh;overflow-y:auto;transition:all .22s cubic-bezier(.32,.72,0,1);box-shadow:0 20px 50px rgba(16,24,40,.24)}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.mhead{padding:18px 22px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);display:flex;justify-content:space-between;align-items:flex-start;gap:14px;z-index:2}
+.mhead h3{font-size:17px;font-weight:600}
+.mhead p{font-size:12.5px;color:var(--muted);margin-top:3px}
+.x{font-size:22px;color:var(--faint);line-height:1;padding:2px 6px}
+.mbody{padding:18px 22px 22px}
+textarea{width:100%;padding:13px;border:1px solid var(--line2);border-radius:10px;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);resize:vertical}
+textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.mfoot{display:flex;gap:9px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+
+/* ---------- report ---------- */
+.rep h4{font-size:12px;color:var(--muted);font-weight:600;margin:18px 0 8px}
+.rep h4:first-child{margin-top:0}
+.rep .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13.5px}
+.rep .kv dt{color:var(--muted)}
+.rep .kv dd{color:var(--ink);font-family:var(--mono);font-size:13px}
+.rep table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+.rep th{text-align:left;font-size:11px;color:var(--muted);padding:7px 8px 7px 0;border-bottom:1px solid var(--line)}
+.rep td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line)}
+.rep .sig{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--faint);line-height:1.6}
+.repbox{border:1px solid var(--line);border-radius:10px;padding:18px;background:var(--card)}
+
+.foot{padding:8px 22px 34px;text-align:center;font-size:12px;color:var(--faint);line-height:1.6;max-width:1240px;margin:0 auto}
+.empty{padding:40px 22px;text-align:center;color:var(--muted);font-size:13.5px}
+
+@media(max-width:960px){ .setup{grid-template-columns:1fr} .detail{grid-template-columns:1fr} .hidesm{display:none} }
+@media print{
+  body{background:#fff} .top,.setup,.sech,.verdict .vacts,.foot,.scrim{display:none!important}
+  .modal{position:static;transform:none;opacity:1;max-height:none;box-shadow:none;width:100%;overflow:visible}
+  .mhead .x{display:none} .mfoot{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
+    <div>
+      <h1>Version Compatibility Sandbox</h1>
+      <p>LabPulse Twin · validate a vendor add-on update before it touches an instrument</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="tagpill">Fleet: <b>10 HPLC systems</b></span>
+    <span class="tagpill">Site: <b>Bengaluru</b></span>
+    <span class="tagpill hidesm">Mode: <b>Software replay only</b></span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= SETUP ================= -->
+  <div class="sec">
+    <div class="sech"><h2>Set up the replay</h2><span class="hint">No instrument time is used. Nothing is written to any system of record.</span></div>
+    <div class="setup">
+
+      <div class="card">
+        <div class="lbl">Add-on module under test</div>
+        <div class="vrow">
+          <span class="vchip cur">IO Biosciences Immuno-Profiler 4.1.3</span>
+          <span class="varrow">&rarr;</span>
+          <span class="vchip cand" id="candChip">4.2.0</span>
+        </div>
+        <div class="lbl">Candidate version</div>
+        <select id="candSel" onchange="setCandidate()">
+          <option value="4.2.0">4.2.0 — released 18 Aug 2026 (integration engine rewrite)</option>
+          <option value="4.3.0b">4.3.0-beta — vendor pre-release (adaptive baseline)</option>
+          <option value="4.1.4">4.1.4 — patch release (reporting fixes only)</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="lbl">Golden reference set</div>
+        <div class="gold">
+          <div class="gitem"><div class="gv">24 runs</div><div class="gl">archived under 4.1.3</div></div>
+          <div class="gitem"><div class="gv">312 samples</div><div class="gl">including 6 QC standards</div></div>
+          <div class="gitem"><div class="gv">Locked</div><div class="gl">12 June 2026</div></div>
+          <div class="gitem"><div class="gv">8 metrics</div><div class="gl">acceptance from lab SOP</div></div>
+        </div>
+      </div>
+
+      <div class="card runbox">
+        <button class="btn primary" id="runBtn" onclick="runReplay()">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Replay against fleet
+        </button>
+        <div class="nohw">Runs entirely in software.<br>No hardware, no columns, no sample consumed.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= PROGRESS ================= -->
+  <div class="sec" id="progSec" hidden>
+    <div class="card prog">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span id="progTitle">Replaying golden set…</span><span class="mono" id="progPct">0%</span></div>
+      <div class="pbar"><i id="progBar"></i></div>
+      <div class="plog" id="progLog"></div>
+    </div>
+  </div>
+
+  <!-- ================= VERDICT ================= -->
+  <div class="sec" id="verdictSec" hidden>
+    <div class="card verdict" id="verdictCard">
+      <div class="vt">
+        <h3 id="vTitle"></h3>
+        <p id="vText"></p>
+      </div>
+      <div class="counts">
+        <div class="count"><div class="cn ok" id="cOk">0</div><div class="cl">compatible</div></div>
+        <div class="count"><div class="cn cond" id="cCond">0</div><div class="cl">conditional</div></div>
+        <div class="count"><div class="cn bad" id="cBad">0</div><div class="cl">not compatible</div></div>
+      </div>
+      <div class="vacts">
+        <button class="btn sm" onclick="openReport()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Validation report</button>
+        <button class="btn sm warn" id="pinBtn" onclick="pinFailing()" hidden>Pin failing instruments to 4.1.3</button>
+        <button class="btn sm" id="vendorBtn" onclick="openVendor()" hidden>Request vendor revert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MATRIX ================= -->
+  <div class="sec" id="matrixSec" hidden>
+    <div class="sech"><h2>Compatibility matrix</h2><span class="hint">Select an instrument to see the metric-level comparison</span></div>
+    <div class="card" style="overflow-x:auto">
+      <table class="mtable">
+        <thead><tr>
+          <th>Instrument</th><th>Configuration</th><th class="hidesm">Group</th><th>Verdict</th><th class="hidesm">Reason</th>
+        </tr></thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= DETAIL ================= -->
+  <div class="sec" id="detailSec" hidden>
+    <div class="sech"><h2>Metric comparison</h2><span class="hint" id="detailHint"></span></div>
+    <div class="detail">
+
+      <div class="card dcard">
+        <div class="dhead">
+          <div><h3 id="dTitle"></h3><div class="ds" id="dSub"></div></div>
+          <span class="st" id="dVerdict"></span>
+        </div>
+        <table class="metrics">
+          <thead><tr><th>Metric</th><th class="num">Golden</th><th class="num">Candidate</th><th class="num">Delta</th></tr></thead>
+          <tbody id="metricBody"></tbody>
+        </table>
+        <div class="dacts">
+          <button class="btn sm" onclick="openReport(true)">Report for this instrument</button>
+          <button class="btn sm" id="dPin" onclick="pinOne()">Pin to 4.1.3</button>
+        </div>
+      </div>
+
+      <div class="card dcard">
+        <div class="dhead"><div><h3>Chromatogram overlay</h3><div class="ds" id="cSub">QC standard 3 · 312 nm</div></div></div>
+        <div class="legend">
+          <span class="g"><i></i>Golden run, version 4.1.3</span>
+          <span class="c"><i></i>Candidate replay</span>
+        </div>
+        <svg class="chart" id="chart" viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chromatogram overlay comparing golden and candidate runs"></svg>
+        <div class="zoomnote" id="zoomNote"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sec" id="emptySec">
+    <div class="card empty">Choose a candidate version and replay it against the golden set to see fleet compatibility.</div>
+  </div>
+
+</div>
+
+<div class="foot">
+  LabPulse Twin · Version Compatibility Sandbox · demonstration build with a synthetic golden set.<br>
+  Validation evidence only. Not a medical device and not part of patient care or clinical reporting.
+</div>
+
+<!-- ================= MODALS ================= -->
+<div class="scrim" id="scrim" onclick="closeModals()"></div>
+
+<div class="modal" id="reportModal">
+  <div class="mhead">
+    <div><h3>Version validation report</h3><p id="repSub"></p></div>
+    <button class="x" onclick="closeModals()">&times;</button>
+  </div>
+  <div class="mbody">
+    <div class="repbox rep" id="repBody"></div>
+    <div class="mfoot">
+      <button class="btn" onclick="closeModals()">Close</button>
+      <button class="btn primary" onclick="window.print()">Print or save as PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="vendorModal">
+  <div class="mhead">
+    <div><h3>Request revert to previous version</h3><p>Addressed to IO Biosciences support, with the failing evidence attached</p></div>
+    <button class="x" onclick="closeModals()">&times;</button>
+  </div>
+  <div class="mbody">
+    <textarea id="vendorText" rows="16"></textarea>
+    <div class="mfoot">
+      <button class="btn" onclick="closeModals()">Close</button>
+      <button class="btn primary" id="copyBtn" onclick="copyVendor()">Copy message</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Fleet definition — configuration groups are what decide
+   compatibility, not the version number alone.
+   ========================================================= */
+var FLEET = [
+  {id:'HPLC-01', model:'Alliance e2695', lab:'QC Lab 2',        det:'2998 PDA', fw:'D-3400', col:'C18 90A', method:'Immuno-Panel A', grp:'A'},
+  {id:'HPLC-02', model:'Alliance e2695', lab:'QC Lab 2',        det:'2998 PDA', fw:'D-3400', col:'C18 90A', method:'Immuno-Panel A', grp:'A'},
+  {id:'HPLC-03', model:'Arc HPLC',       lab:'QC Lab 3',        det:'2998 PDA', fw:'D-3400', col:'C18 90A', method:'Immuno-Panel A', grp:'A'},
+  {id:'HPLC-04', model:'Arc HPLC',       lab:'Stability suite', det:'2998 PDA', fw:'D-3400', col:'C18 90A', method:'Immuno-Panel B', grp:'A'},
+  {id:'HPLC-05', model:'Alliance e2695', lab:'R&D bay 1',       det:'2489 UV',  fw:'D-3400', col:'C8 120A',  method:'Immuno-Panel B', grp:'C'},
+  {id:'HPLC-06', model:'Arc HPLC',       lab:'R&D bay 1',       det:'2489 UV',  fw:'D-3400', col:'C8 120A',  method:'Immuno-Panel B', grp:'C'},
+  {id:'HPLC-07', model:'Alliance 2695',  lab:'QC Lab 1',        det:'2487 UV',  fw:'D-2100', col:'C18 90A', method:'Immuno-Panel A (high salt)', grp:'B'},
+  {id:'HPLC-08', model:'Alliance 2695',  lab:'QC Lab 1',        det:'2487 UV',  fw:'D-2100', col:'C18 90A', method:'Immuno-Panel A (high salt)', grp:'B'},
+  {id:'HPLC-09', model:'Alliance 2695',  lab:'Contract testing',det:'2487 UV',  fw:'D-2100', col:'C18 90A', method:'Immuno-Panel A (high salt)', grp:'B'},
+  {id:'HPLC-10', model:'Arc HPLC',       lab:'QC Lab 3',        det:'2998 PDA', fw:'D-3400', col:'C18 90A', method:'Immuno-Panel A', grp:'A'}
+];
+
+/* Acceptance criteria come from the lab SOP, not from us. */
+var CRITERIA = [
+  {k:'rt',   n:'Retention time shift',      unit:' min', crit:'\u2264 0.05 min',  dp:3},
+  {k:'area', n:'Peak area difference',      unit:' %',   crit:'\u2264 2.0 %',     dp:2},
+  {k:'res',  n:'USP resolution',            unit:'',     crit:'\u2265 2.00',      dp:2},
+  {k:'tail', n:'Tailing factor',            unit:'',     crit:'\u2264 1.50',      dp:2},
+  {k:'sn',   n:'Signal to noise',           unit:'',     crit:'\u2265 50',        dp:0},
+  {k:'lin',  n:'Calibration linearity r\u00b2', unit:'', crit:'\u2265 0.9950',    dp:4},
+  {k:'intg', n:'Integration boundary shift',unit:' s',   crit:'\u2264 1.0 s',     dp:2},
+  {k:'conc', n:'Classification concordance',unit:' %',   crit:'\u2265 99.0 %',    dp:1}
+];
+
+/* Golden baseline (same for all instruments in this demo set) */
+var GOLDEN = {rt:4.812, area:0, res:2.61, tail:1.18, sn:214, lin:0.9993, intg:0, conc:100};
+
+/* Per-version, per-group behaviour of the candidate build.
+   This is where the "what changed" knowledge lives. */
+var BEHAVIOUR = {
+  '4.2.0': {
+    note:'Integration engine rewritten. New baseline detection is more aggressive on noisy detector signals.',
+    A:{rt:0.004, area:0.31, res:2.60, tail:1.18, sn:212, lin:0.9992, intg:0.12, conc:100,
+       why:'All metrics within SOP limits.'},
+    C:{rt:0.031, area:1.42, res:2.21, tail:1.29, sn:168, lin:0.9981, intg:0.61, conc:99.7,
+       why:'Within limits, but resolution and signal to noise both moved materially on the C8 column.'},
+    B:{rt:0.074, area:3.86, res:1.82, tail:1.57, sn:41, lin:0.9938, intg:2.34, conc:96.8,
+       why:'Baseline detection misplaces the integration boundary on legacy 2487 detectors with a high salt method.'}
+  },
+  '4.3.0b': {
+    note:'Adaptive baseline, vendor pre-release. Not yet validated by the vendor for legacy detectors.',
+    A:{rt:0.012, area:0.88, res:2.52, tail:1.21, sn:203, lin:0.9990, intg:0.28, conc:99.9,
+       why:'Within limits, though every metric moved slightly more than the 4.2.0 build.'},
+    C:{rt:0.058, area:2.34, res:2.04, tail:1.41, sn:132, lin:0.9967, intg:1.19, conc:99.1,
+       why:'Retention shift, area difference and boundary shift all exceed SOP limits on C8 columns.'},
+    B:{rt:0.096, area:5.12, res:1.64, tail:1.71, sn:33, lin:0.9902, intg:3.41, conc:94.2,
+       why:'Fails on six of eight metrics. Adaptive baseline is unstable on legacy detector noise.'}
+  },
+  '4.1.4': {
+    note:'Reporting fixes only. No change to acquisition or integration.',
+    A:{rt:0.000, area:0.02, res:2.61, tail:1.18, sn:214, lin:0.9993, intg:0.00, conc:100, why:'No measurable change from the golden set.'},
+    C:{rt:0.000, area:0.03, res:2.61, tail:1.18, sn:213, lin:0.9993, intg:0.00, conc:100, why:'No measurable change from the golden set.'},
+    B:{rt:0.001, area:0.04, res:2.60, tail:1.19, sn:211, lin:0.9992, intg:0.01, conc:100, why:'No measurable change from the golden set.'}
+  }
+};
+
+var GROUPNAME = {
+  A:'2998 PDA · firmware D-3400 · C18',
+  B:'2487 UV · firmware D-2100 · high salt method',
+  C:'2489 UV · firmware D-3400 · C8 column'
+};
+
+/* ---------- metric evaluation ---------- */
+function evalMetric(k, v){
+  switch(k){
+    case 'rt':   return v <= 0.05 ? 'ok' : 'bad';
+    case 'area': return v <= 2.0  ? (v <= 1.0 ? 'ok':'cond') : 'bad';
+    case 'res':  return v >= 2.00 ? (v >= 2.40 ? 'ok':'cond') : 'bad';
+    case 'tail': return v <= 1.50 ? (v <= 1.30 ? 'ok':'cond') : 'bad';
+    case 'sn':   return v >= 50   ? (v >= 150 ? 'ok':'cond') : 'bad';
+    case 'lin':  return v >= 0.9950 ? 'ok' : 'bad';
+    case 'intg': return v <= 1.0  ? (v <= 0.5 ? 'ok':'cond') : 'bad';
+    case 'conc': return v >= 99.0 ? (v >= 99.8 ? 'ok':'cond') : 'bad';
+  }
+  return 'ok';
+}
+function verdictFor(res){
+  var worst = 'ok';
+  CRITERIA.forEach(function(c){
+    var s = evalMetric(c.k, res[c.k]);
+    if(s === 'bad') worst = 'bad';
+    else if(s === 'cond' && worst !== 'bad') worst = 'cond';
+  });
+  return worst;
+}
+var LABEL = {ok:'Compatible', cond:'Conditional', bad:'Not compatible'};
+
+/* ---------- state ---------- */
+var candidate = '4.2.0';
+var results = [];
+var selected = null;
+var pinned = {};
+
+function setCandidate(){
+  candidate = document.getElementById('candSel').value;
+  document.getElementById('candChip').textContent = candidate === '4.3.0b' ? '4.3.0-beta' : candidate;
+  // reset previous run
+  results = []; selected = null;
+  ['verdictSec','matrixSec','detailSec','progSec'].forEach(function(id){ document.getElementById(id).hidden = true; });
+  document.getElementById('emptySec').hidden = false;
+}
+
+/* ---------- replay ---------- */
+function runReplay(){
+  var btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  document.getElementById('emptySec').hidden = true;
+  ['verdictSec','matrixSec','detailSec'].forEach(function(id){ document.getElementById(id).hidden = true; });
+  var ps = document.getElementById('progSec'); ps.hidden = false;
+
+  results = [];
+  var steps = [];
+  steps.push('Loading golden set — 24 runs, 312 samples, locked 12 Jun 2026');
+  steps.push('Loading candidate build ' + candidate + ' into isolated sandbox');
+  FLEET.forEach(function(f){ steps.push('Replaying ' + f.id + ' — ' + f.method); });
+  steps.push('Comparing 8 metrics against SOP acceptance criteria');
+  steps.push('Grouping outcomes by instrument configuration');
+
+  var i = 0;
+  var timer = setInterval(function(){
+    var pct = Math.round(((i + 1) / steps.length) * 100);
+    document.getElementById('progBar').style.width = pct + '%';
+    document.getElementById('progPct').textContent = pct + '%';
+    document.getElementById('progLog').textContent = steps[i];
+    i++;
+    if(i >= steps.length){
+      clearInterval(timer);
+      setTimeout(finishReplay, 320);
+    }
+  }, 190);
+}
+
+function finishReplay(){
+  var beh = BEHAVIOUR[candidate];
+  results = FLEET.map(function(f){
+    var r = beh[f.grp];
+    return {inst:f, res:r, verdict:verdictFor(r), why:r.why};
+  });
+  document.getElementById('progSec').hidden = true;
+  document.getElementById('runBtn').disabled = false;
+  renderVerdict();
+  renderMatrix();
+  selectInstrument(0);
+}
+
+/* ---------- verdict banner ---------- */
+function renderVerdict(){
+  var ok = results.filter(function(r){return r.verdict==='ok';}).length;
+  var cond = results.filter(function(r){return r.verdict==='cond';}).length;
+  var bad = results.filter(function(r){return r.verdict==='bad';}).length;
+  document.getElementById('cOk').textContent = ok;
+  document.getElementById('cCond').textContent = cond;
+  document.getElementById('cBad').textContent = bad;
+
+  var card = document.getElementById('verdictCard');
+  card.className = 'card verdict ' + (bad ? (ok+cond ? 'mixed' : 'fail') : 'pass');
+
+  var t = document.getElementById('vTitle'), x = document.getElementById('vText');
+  var vname = candidate === '4.3.0b' ? '4.3.0-beta' : candidate;
+  if(bad === 0){
+    t.textContent = 'Version ' + vname + ' is safe to roll out across the fleet';
+    x.textContent = 'All ' + results.length + ' instruments reproduce the golden set within SOP acceptance limits. ' + BEHAVIOUR[candidate].note;
+  } else if(ok + cond > 0){
+    t.textContent = 'Version ' + vname + ' is safe on part of the fleet only';
+    x.textContent = bad + ' instruments fail acceptance and must stay on 4.1.3. The failures are not random — they share one configuration: ' + GROUPNAME.B + '.';
+  } else {
+    t.textContent = 'Version ' + vname + ' fails across the entire fleet';
+    x.textContent = 'No instrument reproduces the golden set within SOP limits. Recommend holding the rollout and returning the evidence to the vendor.';
+  }
+  document.getElementById('pinBtn').hidden = bad === 0;
+  document.getElementById('vendorBtn').hidden = bad === 0;
+  document.getElementById('verdictSec').hidden = false;
+}
+
+/* ---------- matrix ---------- */
+function renderMatrix(){
+  var tb = document.getElementById('matrixBody');
+  tb.innerHTML = '';
+  results.forEach(function(r, idx){
+    var tr = document.createElement('tr');
+    tr.onclick = function(){ selectInstrument(idx); };
+    if(selected === idx) tr.className = 'sel';
+    var isPinned = pinned[r.inst.id];
+    var stCls = isPinned ? 'pin' : r.verdict;
+    var stTxt = isPinned ? 'Pinned to 4.1.3' : LABEL[r.verdict];
+    tr.innerHTML =
+      '<td><div class="iid">' + r.inst.id + '</div><div class="isub">' + r.inst.model + ' · ' + r.inst.lab + '</div></td>' +
+      '<td><div class="cfg">' + r.inst.det + ' · ' + r.inst.fw + '</div><div class="isub">' + r.inst.col + ' · ' + r.inst.method + '</div></td>' +
+      '<td class="hidesm"><span class="grp">Group ' + r.inst.grp + '</span></td>' +
+      '<td><span class="st ' + stCls + '"><span class="d"></span>' + stTxt + '</span></td>' +
+      '<td class="hidesm"><div class="why">' + r.why + '</div></td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('matrixSec').hidden = false;
+}
+
+/* ---------- detail ---------- */
+function selectInstrument(idx){
+  selected = idx;
+  renderMatrix();
+  var r = results[idx];
+  document.getElementById('dTitle').textContent = r.inst.id + ' · ' + r.inst.model;
+  document.getElementById('dSub').textContent = r.inst.det + ' · ' + r.inst.fw + ' · ' + r.inst.col;
+  document.getElementById('detailHint').textContent = 'Group ' + r.inst.grp + ' — ' + GROUPNAME[r.inst.grp];
+
+  var v = document.getElementById('dVerdict');
+  var isPinned = pinned[r.inst.id];
+  v.className = 'st ' + (isPinned ? 'pin' : r.verdict);
+  v.innerHTML = '<span class="d"></span>' + (isPinned ? 'Pinned to 4.1.3' : LABEL[r.verdict]);
+
+  var tb = document.getElementById('metricBody');
+  tb.innerHTML = '';
+  CRITERIA.forEach(function(c){
+    var g = GOLDEN[c.k], cand = r.res[c.k];
+    var status = evalMetric(c.k, cand);
+    var deltaTxt;
+    if(c.k === 'rt' || c.k === 'intg' || c.k === 'area'){
+      deltaTxt = '+' + cand.toFixed(c.dp) + c.unit;
+    } else {
+      var d = cand - g;
+      deltaTxt = (d >= 0 ? '+' : '') + d.toFixed(c.dp);
+    }
+    var goldTxt = (c.k === 'rt') ? g.toFixed(3) + ' min' : (c.k === 'area' || c.k === 'intg') ? '\u2014' : g.toFixed(c.dp);
+    var candTxt = (c.k === 'rt') ? (g + cand).toFixed(3) + ' min' : (c.k === 'area' || c.k === 'intg') ? cand.toFixed(c.dp) + c.unit : cand.toFixed(c.dp);
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><div class="mn">' + c.n + '</div><div class="crit">' + c.crit + '</div></td>' +
+      '<td class="num">' + goldTxt + '</td>' +
+      '<td class="num">' + candTxt + '</td>' +
+      '<td class="num dv ' + status + '">' + deltaTxt + '</td>';
+    tb.appendChild(tr);
+  });
+
+  document.getElementById('dPin').textContent = isPinned ? 'Unpin (allow update)' : 'Pin to 4.1.3';
+  drawChart(r);
+  document.getElementById('zoomNote').innerHTML = zoomText(r);
+  document.getElementById('detailSec').hidden = false;
+}
+
+function zoomText(r){
+  if(r.verdict === 'ok')
+    return 'The candidate trace sits on top of the golden trace. Peak start and end markers are within <b>' + r.res.intg.toFixed(2) + ' s</b> of the archived run, so integration is reproducing the validated result.';
+  if(r.verdict === 'cond')
+    return 'The candidate trace follows the golden trace, but peak 3 elutes <b>' + r.res.rt.toFixed(3) + ' min</b> later and resolution drops to <b>' + r.res.res.toFixed(2) + '</b>. Still inside SOP limits — acceptable with a confirmatory run before release.';
+  return 'The candidate integration boundary opens <b>' + r.res.intg.toFixed(2) + ' s</b> early on peak 3 and closes late, absorbing part of the neighbouring shoulder. That is the source of the <b>' + r.res.area.toFixed(2) + '%</b> area difference and the drop in classification concordance to <b>' + r.res.conc.toFixed(1) + '%</b>.';
+}
+
+/* ---------- chromatogram ---------- */
+function drawChart(r){
+  var W = 620, H = 260, L = 44, R = 12, T = 14, B = 30;
+  var pw = W - L - R, ph = H - T - B;
+  var peaks = [
+    {t:0.16, h:0.30, w:0.020},
+    {t:0.31, h:0.62, w:0.022},
+    {t:0.50, h:0.92, w:0.024},
+    {t:0.58, h:0.34, w:0.020},
+    {t:0.78, h:0.45, w:0.026}
+  ];
+  function trace(shift, scale, noise){
+    var pts = [];
+    for(var i = 0; i <= 300; i++){
+      var x = i / 300, y = 0;
+      peaks.forEach(function(p, pi){
+        var c = p.t + (pi >= 2 ? shift : shift * 0.3);
+        var hh = p.h * (pi === 2 ? scale : 1);
+        y += hh * Math.exp(-Math.pow(x - c, 2) / (2 * p.w * p.w));
+      });
+      y += noise * (Math.sin(i * 2.7) * 0.5 + Math.sin(i * 7.3) * 0.5) * 0.02;
+      pts.push([L + x * pw, T + ph - y * ph * 0.86]);
+    }
+    return 'M' + pts.map(function(p){ return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' L');
+  }
+  var shift = r.res.rt * 1.6;            // visual exaggeration of retention drift
+  var scale = 1 + (r.res.area / 100) * 1.4;
+  var noise = r.verdict === 'bad' ? 1.6 : (r.verdict === 'cond' ? 0.7 : 0.25);
+
+  var gPath = trace(0, 1, 0.2);
+  var cPath = trace(shift, scale, noise);
+  var colour = r.verdict === 'bad' ? 'var(--red)' : (r.verdict === 'cond' ? 'var(--amber)' : 'var(--blue)');
+
+  // integration boundary markers around peak 3
+  var gx1 = L + (0.50 - 0.055) * pw, gx2 = L + (0.50 + 0.055) * pw;
+  var cOff = (r.res.intg / 60) * pw * 0.9;
+  var cx1 = gx1 - cOff, cx2 = gx2 + cOff * 0.6;
+
+  var svg = '';
+  svg += '<rect x="' + L + '" y="' + T + '" width="' + pw + '" height="' + ph + '" fill="none" stroke="var(--line)"/>';
+  for(var g = 1; g < 4; g++){
+    var yy = T + (ph / 4) * g;
+    svg += '<line x1="' + L + '" y1="' + yy + '" x2="' + (L + pw) + '" y2="' + yy + '" stroke="var(--line)" stroke-dasharray="3 4"/>';
+  }
+  svg += '<rect x="' + cx1 + '" y="' + T + '" width="' + (cx2 - cx1) + '" height="' + ph + '" fill="' + colour + '" opacity="0.07"/>';
+  svg += '<line x1="' + gx1 + '" y1="' + T + '" x2="' + gx1 + '" y2="' + (T + ph) + '" stroke="var(--blue)" stroke-dasharray="4 3" opacity="0.55"/>';
+  svg += '<line x1="' + gx2 + '" y1="' + T + '" x2="' + gx2 + '" y2="' + (T + ph) + '" stroke="var(--blue)" stroke-dasharray="4 3" opacity="0.55"/>';
+  if(r.res.intg > 0.4){
+    svg += '<line x1="' + cx1 + '" y1="' + T + '" x2="' + cx1 + '" y2="' + (T + ph) + '" stroke="' + colour + '" stroke-dasharray="4 3"/>';
+    svg += '<line x1="' + cx2 + '" y1="' + T + '" x2="' + cx2 + '" y2="' + (T + ph) + '" stroke="' + colour + '" stroke-dasharray="4 3"/>';
+  }
+  svg += '<path d="' + gPath + '" fill="none" stroke="var(--blue)" stroke-width="1.8"/>';
+  svg += '<path d="' + cPath + '" fill="none" stroke="' + colour + '" stroke-width="1.8" stroke-dasharray="5 3"/>';
+  svg += '<text x="' + L + '" y="' + (H - 9) + '" font-size="10.5" fill="var(--faint)" font-family="var(--mono)">0 min</text>';
+  svg += '<text x="' + (L + pw) + '" y="' + (H - 9) + '" font-size="10.5" fill="var(--faint)" text-anchor="end" font-family="var(--mono)">12 min</text>';
+  svg += '<text x="10" y="' + (T + 12) + '" font-size="10.5" fill="var(--faint)" font-family="var(--mono)">mAU</text>';
+  svg += '<text x="' + (L + 0.50 * pw) + '" y="' + (T + 12) + '" font-size="10.5" fill="var(--muted)" text-anchor="middle">peak 3</text>';
+  document.getElementById('chart').innerHTML = svg;
+}
+
+/* ---------- pinning ---------- */
+function pinFailing(){
+  results.forEach(function(r){ if(r.verdict === 'bad') pinned[r.inst.id] = true; });
+  renderMatrix();
+  if(selected !== null) selectInstrument(selected);
+}
+function pinOne(){
+  var r = results[selected];
+  if(pinned[r.inst.id]) delete pinned[r.inst.id]; else pinned[r.inst.id] = true;
+  selectInstrument(selected);
+}
+
+/* ---------- modals ---------- */
+function openModal(id){
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById(id).classList.add('open');
+}
+function closeModals(){
+  document.getElementById('scrim').classList.remove('open');
+  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('open'); });
+}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModals(); });
+
+function today(){
+  return new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+}
+function openReport(single){
+  var vname = candidate === '4.3.0b' ? '4.3.0-beta' : candidate;
+  var scope = single ? results[selected].inst.id : 'Fleet — 10 instruments';
+  document.getElementById('repSub').textContent = 'IO Biosciences Immuno-Profiler 4.1.3 to ' + vname + ' · ' + scope;
+
+  var rows = (single ? [results[selected]] : results).map(function(r){
+    return '<tr><td>' + r.inst.id + '</td><td>' + r.inst.det + ' · ' + r.inst.fw + '</td><td>Group ' + r.inst.grp +
+           '</td><td>' + LABEL[r.verdict] + '</td><td>' + (pinned[r.inst.id] ? 'Pinned to 4.1.3' : (r.verdict === 'bad' ? 'Hold' : 'Approved')) + '</td></tr>';
+  }).join('');
+
+  var bad = results.filter(function(r){return r.verdict==='bad';}).length;
+  var cond = results.filter(function(r){return r.verdict==='cond';}).length;
+  var ok = results.length - bad - cond;
+
+  var concl = bad === 0
+    ? 'The candidate version reproduces the golden reference set within all SOP acceptance criteria on every instrument tested. Rollout is approved.'
+    : 'The candidate version reproduces the golden reference set within acceptance criteria on ' + (ok + cond) + ' of ' + results.length +
+      ' instruments. It fails on ' + bad + ' instruments, all sharing the configuration ' + GROUPNAME.B +
+      '. Those instruments are to remain on version 4.1.3 until the vendor supplies a corrected build.';
+
+  document.getElementById('repBody').innerHTML =
+    '<h4>Report details</h4>' +
+    '<dl class="kv">' +
+      '<dt>Report reference</dt><dd>VCS-' + (2400 + Math.floor(Math.random()*99)) + '</dd>' +
+      '<dt>Date</dt><dd>' + today() + '</dd>' +
+      '<dt>Module</dt><dd>IO Biosciences Immuno-Profiler</dd>' +
+      '<dt>Current version</dt><dd>4.1.3</dd>' +
+      '<dt>Candidate version</dt><dd>' + vname + '</dd>' +
+      '<dt>Method</dt><dd>Software replay against archived golden set</dd>' +
+      '<dt>Golden set</dt><dd>24 runs · 312 samples · locked 12 Jun 2026</dd>' +
+      '<dt>Instrument time used</dt><dd>None</dd>' +
+    '</dl>' +
+    '<h4>Acceptance criteria applied</h4>' +
+    '<div style="font-size:12.5px;color:var(--muted);line-height:1.7">' +
+      CRITERIA.map(function(c){ return c.n + ' ' + c.crit; }).join(' &nbsp;·&nbsp; ') +
+    '</div>' +
+    '<h4>Result by instrument</h4>' +
+    '<table><thead><tr><th>Instrument</th><th>Configuration</th><th>Group</th><th>Verdict</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<h4>Conclusion</h4>' +
+    '<div style="font-size:13.5px;line-height:1.6">' + concl + '</div>' +
+    '<div class="sig">Generated by LabPulse Twin, Version Compatibility Sandbox. This report records a software replay against archived data. ' +
+    'It does not replace the laboratory\u2019s own release procedure, and requires review and approval by the responsible analyst before any version change is applied.<br><br>' +
+    'Reviewed by \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 &nbsp;&nbsp; Date \u2014\u2014\u2014\u2014\u2014\u2014</div>';
+  openModal('reportModal');
+}
+
+function openVendor(){
+  var vname = candidate === '4.3.0b' ? '4.3.0-beta' : candidate;
+  var failing = results.filter(function(r){ return r.verdict === 'bad'; });
+  var ids = failing.map(function(r){ return r.inst.id; }).join(', ');
+  var r0 = failing[0];
+  var msg =
+'Subject: Immuno-Profiler ' + vname + ' — compatibility failure on legacy detector configuration, revert requested\n\n' +
+'Hello,\n\n' +
+'We evaluated Immuno-Profiler ' + vname + ' before deployment by replaying it against our locked golden reference set (24 runs, 312 samples, archived under 4.1.3 on 12 June 2026). No instrument time was used.\n\n' +
+'The build passes on ' + (results.length - failing.length) + ' of our ' + results.length + ' systems, and fails acceptance on ' + failing.length + ': ' + ids + '.\n\n' +
+'All failing systems share one configuration:\n' +
+'  Detector: 2487 UV, firmware D-2100\n' +
+'  Column: C18 90A\n' +
+'  Method: Immuno-Panel A, high salt\n\n' +
+'Observed against our SOP acceptance criteria:\n' +
+'  Retention time shift      ' + r0.res.rt.toFixed(3) + ' min   (limit 0.05 min)\n' +
+'  Peak area difference      ' + r0.res.area.toFixed(2) + ' %      (limit 2.0 %)\n' +
+'  USP resolution            ' + r0.res.res.toFixed(2) + '        (limit 2.00 minimum)\n' +
+'  Tailing factor            ' + r0.res.tail.toFixed(2) + '        (limit 1.50)\n' +
+'  Signal to noise           ' + r0.res.sn.toFixed(0) + '          (limit 50 minimum)\n' +
+'  Integration boundary shift ' + r0.res.intg.toFixed(2) + ' s     (limit 1.0 s)\n' +
+'  Classification concordance ' + r0.res.conc.toFixed(1) + ' %     (limit 99.0 % minimum)\n\n' +
+'Root cause as far as we can observe it: the new baseline detection opens the integration window early on peak 3 and absorbs part of the neighbouring shoulder. The effect appears only where detector noise is higher, which is why it is isolated to the D-2100 firmware systems.\n\n' +
+'Requests:\n' +
+'1. Confirm whether ' + vname + ' is validated for 2487 UV detectors on D-2100 firmware.\n' +
+'2. Until a corrected build is available, we are keeping the affected systems pinned to 4.1.3. Please confirm 4.1.3 remains supported.\n' +
+'3. We can share the full validation report and the replayed traces on request.\n\n' +
+'Regards,\n' +
+'Quality Systems\n';
+  document.getElementById('vendorText').value = msg;
+  openModal('vendorModal');
+}
+
+function copyVendor(){
+  var t = document.getElementById('vendorText');
+  t.select(); t.setSelectionRange(0, 99999);
+  try{ document.execCommand('copy'); }catch(e){}
+  var b = document.getElementById('copyBtn');
+  b.textContent = 'Copied';
+  setTimeout(function(){ b.textContent = 'Copy message'; }, 1600);
+}
+</script>
+</body>
+</html>

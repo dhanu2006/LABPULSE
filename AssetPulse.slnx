@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AssetPulse.Host/AssetPulse.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/AssetPulse.Infrastructure/AssetPulse.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/AssetPulse.SharedKernel/AssetPulse.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/AssetPulse.Modules.AI/AssetPulse.Modules.AI.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Assets/AssetPulse.Modules.Assets.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Calibration/AssetPulse.Modules.Calibration.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.ComplaintAmc/AssetPulse.Modules.ComplaintAmc.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.DigitalTwin/AssetPulse.Modules.DigitalTwin.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.FireAudit/AssetPulse.Modules.FireAudit.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Insights/AssetPulse.Modules.Insights.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Inventory/AssetPulse.Modules.Inventory.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Maintenance/AssetPulse.Modules.Maintenance.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.MasterData/AssetPulse.Modules.MasterData.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.Notifications/AssetPulse.Modules.Notifications.csproj" />
+    <Project Path="src/Modules/AssetPulse.Modules.ServiceCases/AssetPulse.Modules.ServiceCases.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AssetPulse.Tests/AssetPulse.Tests.csproj" />
+  </Folder>
+</Solution>

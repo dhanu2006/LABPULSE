@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LabPulse Twin — Ask the machine what happens if</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B2138; --deep:#04121F; --mid:#123A52;
+  --teal:#0E8074; --teal-l:#19B39F; --teal-d:#0A6459;
+  --twin:#6C5CE0; --twin-l:#8B7BF0; --twin-d:#4B3FB0;
+  --amber:#E8963C; --red:#C9432F; --red-l:#E2604B;
+  --canvas:#F2F7F7; --paper:#FFFFFF;
+  --line:#DEE8EA; --line-2:#C3D4D7;
+  --body:#33474F; --muted:#68808A;
+  --disp:'Bricolage Grotesque', system-ui, sans-serif;
+  --sans:'DM Sans', system-ui, sans-serif;
+  --mono:'IBM Plex Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans); color:var(--body); background:var(--canvas); overflow-x:hidden; -webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4,.d{font-family:var(--disp); letter-spacing:-0.025em; line-height:1.05;}
+section{position:relative;}
+.wrap{width:100%; max-width:1180px; margin:0 auto; padding:0 24px;}
+
+.rv{opacity:0; transform:translateY(26px); transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1);}
+.rv.in{opacity:1; transform:none;}
+.rv[data-d="1"]{transition-delay:.08s} .rv[data-d="2"]{transition-delay:.16s}
+.rv[data-d="3"]{transition-delay:.24s} .rv[data-d="4"]{transition-delay:.32s}
+.rv[data-d="5"]{transition-delay:.40s} .rv[data-d="6"]{transition-delay:.48s}
+
+.eyebrow{font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--twin-d); margin-bottom:16px; display:flex; align-items:center; gap:10px;}
+.eyebrow::before{content:''; width:26px; height:2px; background:var(--twin); display:block;}
+.eyebrow.on-dark{color:var(--twin-l);}
+.eyebrow.teal{color:var(--teal-d);} .eyebrow.teal::before{background:var(--teal);}
+h2.sec{font-size:clamp(30px,4.6vw,52px); font-weight:700; color:var(--ink); margin-bottom:18px;}
+.lede{font-size:clamp(16px,1.7vw,19px); line-height:1.62; color:var(--body); max-width:64ch;}
+
+/* ================= HERO ================= */
+.hero{background:var(--deep); color:#fff; min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding:96px 0 60px; overflow:hidden;}
+.hero::before{content:''; position:absolute; inset:0; background:radial-gradient(900px 520px at 74% 12%, rgba(108,92,224,.34), transparent 62%), radial-gradient(700px 420px at 8% 88%, rgba(14,128,116,.20), transparent 60%); pointer-events:none;}
+.grid-bg{position:absolute; inset:0; opacity:.05; pointer-events:none; background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px); background-size:46px 46px;}
+.hero .wrap{position:relative; z-index:2;}
+.badge{display:inline-flex; align-items:center; gap:9px; padding:7px 15px; border-radius:100px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05); font-size:12px; letter-spacing:.06em; color:#C6C0EC; margin-bottom:30px;}
+.badge b{color:#fff; font-weight:500;}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--twin-l);animation:pl 1.6s ease-in-out infinite;}
+@keyframes pl{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.hero h1{font-size:clamp(46px,9vw,116px); font-weight:800; color:#fff; line-height:.94; margin-bottom:22px;}
+.hero h1 .k{background:linear-gradient(92deg,#fff 28%,var(--twin-l)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero .tag{font-family:var(--disp); font-size:clamp(19px,2.9vw,34px); font-weight:400; color:#B9BCD6; line-height:1.25; max-width:22ch;}
+.hero .tag b{color:#fff; font-weight:600;}
+.metaline{display:flex; flex-wrap:wrap; gap:10px 22px; font-size:13px; color:#7C8AA0; padding-top:22px; border-top:1px solid rgba(255,255,255,.12); margin-top:38px;}
+.metaline b{color:#D2D6EA; font-weight:500;}
+
+/* signature: the fork of futures */
+.fork{width:100%; max-width:840px; margin:44px 0 0; display:block;}
+.fork .past{fill:none;stroke:var(--teal-l);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.9s cubic-bezier(.4,0,.2,1) .3s forwards;}
+.fork .f1{fill:none;stroke:var(--twin-l);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:5 5;stroke-dashoffset:460;animation:draw 1.5s ease 2.1s forwards;}
+.fork .f2{fill:none;stroke:var(--amber);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:5 5;stroke-dashoffset:460;animation:draw 1.5s ease 2.35s forwards;}
+.fork .f3{fill:none;stroke:var(--red-l);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:5 5;stroke-dashoffset:460;animation:draw 1.5s ease 2.6s forwards;}
+.fork .band{fill:var(--twin);opacity:0;animation:fadeb 1s ease 3.2s forwards;}
+.fork .nowline{stroke:#fff;stroke-width:1.2;opacity:.35;}
+.fork .lab{font-family:var(--sans);font-size:11px;fill:#7C8AA0;letter-spacing:.14em;text-transform:uppercase;}
+.fork .flab{font-family:var(--sans);font-size:11.5px;font-weight:700;opacity:0;animation:fade .8s ease 3.4s forwards;}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+@keyframes fadeb{to{opacity:.13}}
+.scroller{position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:3; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#537078; display:flex; flex-direction:column; align-items:center; gap:9px;}
+.scroller i{display:block;width:1px;height:34px;background:linear-gradient(#537078,transparent);animation:sc 2s ease-in-out infinite;}
+@keyframes sc{0%,100%{opacity:.3;transform:scaleY(.6);transform-origin:top}50%{opacity:1;transform:scaleY(1)}}
+
+/* ================= bands ================= */
+.band{padding:clamp(72px,10vw,124px) 0;}
+.band.paper{background:var(--paper);}
+.band.dark{background:var(--ink); color:#BFD3D6;}
+.band.dark h2.sec{color:#fff;}
+.band.dark .lede{color:#A2BFC2;}
+.punch{margin-top:50px; padding:24px 28px; background:var(--ink); border-radius:12px; font-family:var(--disp); font-size:clamp(17px,2.2vw,24px); font-weight:600; color:#fff; line-height:1.35;}
+.punch b{color:var(--twin-l);}
+
+/* ============ three questions ============ */
+.qrows{margin-top:48px; display:flex; flex-direction:column; gap:10px;}
+.qrow{display:grid; grid-template-columns:1.15fr 1fr 1.25fr; gap:clamp(12px,2.4vw,26px); align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:20px 22px;}
+.qrow.key{border-color:var(--twin); box-shadow:0 0 0 1px var(--twin); background:#FBFAFF;}
+.qrow .qq{font-family:var(--disp); font-size:17.5px; font-weight:700; color:var(--ink); line-height:1.25;}
+.qrow .ql{font-family:var(--mono); font-size:12.5px; color:var(--muted);}
+.qrow.key .ql{color:var(--twin-d);}
+.qrow .qd{font-size:14px; line-height:1.55; color:var(--muted);}
+.qrow.key .qd{color:var(--body);}
+.qhead{display:grid; grid-template-columns:1.15fr 1fr 1.25fr; gap:clamp(12px,2.4vw,26px); padding:0 22px 2px; font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:700;}
+
+/* ============ tiers ============ */
+.tiers{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:50px;}
+.tier{background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.13); border-radius:14px; padding:26px 22px; display:flex; flex-direction:column;}
+.tier .tn{font-family:var(--mono); font-size:11.5px; color:var(--twin-l); letter-spacing:.1em; margin-bottom:14px;}
+.tier h4{font-size:21px; color:#fff; margin-bottom:6px; font-weight:700;}
+.tier .sub{font-size:12.5px; color:#7C8AA0; margin-bottom:14px; font-family:var(--mono);}
+.tier p{font-size:14px; line-height:1.6; color:#A2BFC2; margin-bottom:14px;}
+.tier .job{margin-top:auto; padding-top:14px; border-top:1px solid rgba(255,255,255,.12); font-size:13px; color:#fff;}
+.tier .job b{color:var(--twin-l); font-weight:600;}
+
+/* ============ use cases ============ */
+.cases{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:48px;}
+.case{background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:24px;}
+.case .cn{font-family:var(--mono); font-size:11.5px; color:var(--twin-d); margin-bottom:10px;}
+.case h4{font-size:18.5px; color:var(--ink); margin-bottom:9px; font-weight:700; line-height:1.25;}
+.case p{font-size:14px; line-height:1.6; color:var(--muted);}
+.case .out{margin-top:13px; padding-top:13px; border-top:1px solid var(--line); font-family:var(--mono); font-size:12.5px; color:var(--teal-d); line-height:1.6;}
+
+/* ============ feature detail ============ */
+.fsplit{display:grid; grid-template-columns:1fr 1fr; gap:clamp(18px,3vw,40px); margin-top:46px; align-items:start;}
+.steplist{display:flex; flex-direction:column; gap:0;}
+.sstep{display:grid; grid-template-columns:30px 1fr; gap:16px; padding:15px 0; border-bottom:1px solid rgba(255,255,255,.1);}
+.sstep:last-child{border-bottom:none;}
+.sstep .sn{font-family:var(--mono); font-size:12.5px; color:var(--twin-l); padding-top:2px;}
+.sstep .sb{font-size:14.5px; line-height:1.55; color:#BFD3D6;}
+.sstep .sb b{color:#fff; font-weight:600;}
+.matrix{background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.13); border-radius:12px; padding:20px;}
+.mrow{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid rgba(255,255,255,.09); font-size:13.5px;}
+.mrow:last-child{border-bottom:none;}
+.mrow .mi{font-family:var(--mono); font-size:12.5px; color:#fff;}
+.mrow .mc{font-size:12px; color:#7C8AA0;}
+.tagx{font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:100px; white-space:nowrap;}
+.tagx.ok{color:#7EDCB4; background:rgba(126,220,180,.13);}
+.tagx.no{color:#F09B8B; background:rgba(240,155,139,.15);}
+.mnote{margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.12); font-size:13px; color:#A2BFC2; line-height:1.55;}
+.mnote b{color:#fff;}
+
+/* ============ evidence ============ */
+.ev2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:46px;}
+.evc{background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:26px 24px;}
+.evc h4{font-size:19px; color:var(--ink); margin-bottom:10px; font-weight:700;}
+.evc p{font-size:14px; line-height:1.6; color:var(--muted); margin-bottom:14px;}
+.stat2{display:flex; gap:26px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--line);}
+.stat2 .s{min-width:76px;}
+.stat2 .sv{font-family:var(--disp); font-size:26px; font-weight:800; color:var(--ink); line-height:1;}
+.stat2 .sl{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.4;}
+.sv.tw{color:var(--twin-d);} .sv.tl{color:var(--teal-d);}
+
+/* ============ business ============ */
+.biz{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:48px;}
+.bz{background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.13); border-radius:14px; padding:24px 22px;}
+.bz .bn{font-family:var(--mono); font-size:11.5px; color:var(--twin-l); margin-bottom:12px;}
+.bz h4{font-size:18px; color:#fff; margin-bottom:9px; font-weight:700; line-height:1.3;}
+.bz p{font-size:13.5px; line-height:1.6; color:#A2BFC2;}
+.codebox{margin-top:20px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.12); border-radius:11px; padding:18px 20px; font-family:var(--mono); font-size:12.5px; line-height:1.85; color:#BFD3D6; overflow-x:auto; white-space:pre;}
+.codebox b{color:#fff; font-weight:500;}
+.codebox em{color:var(--twin-l); font-style:normal;}
+
+/* ============ built ============ */
+.built{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:46px;}
+.bi{display:grid; grid-template-columns:20px 1fr; gap:13px; background:var(--paper); border:1px solid var(--line); border-radius:11px; padding:16px 18px; align-items:start;}
+.bi .tick{width:17px;height:17px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.bi .tick svg{width:10px;height:10px;stroke:#fff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.bi .bt{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
+.bi .bb{font-size:13px; color:var(--muted); line-height:1.5;}
+.honest{margin-top:22px; background:#FFF9EE; border:1px solid #F2DEBC; border-radius:12px; padding:20px 22px; font-size:14.5px; line-height:1.6; color:var(--body);}
+.honest b{color:var(--ink);}
+
+/* ============ close ============ */
+.close{background:var(--deep); color:#fff; padding:clamp(80px,11vw,132px) 0; overflow:hidden; position:relative;}
+.close::before{content:''; position:absolute; inset:0; background:radial-gradient(820px 430px at 50% 0%, rgba(108,92,224,.32), transparent 66%);}
+.close .wrap{position:relative; z-index:2; text-align:center;}
+.close h2{font-size:clamp(28px,5vw,56px); font-weight:800; color:#fff; line-height:1.1; max-width:20ch; margin:0 auto 24px;}
+.close h2 em{font-style:normal; color:var(--twin-l);}
+.close .sub{font-size:clamp(15px,1.9vw,19px); color:#A2BFC2; max-width:56ch; margin:0 auto 40px; line-height:1.6;}
+.pills{display:flex; flex-wrap:wrap; gap:11px; justify-content:center; margin-bottom:44px;}
+.pills span{padding:9px 18px; border-radius:100px; border:1px solid rgba(255,255,255,.2); font-size:13px; color:#CBD0E4; background:rgba(255,255,255,.04);}
+.sig2{padding-top:30px; margin-top:42px; border-top:1px solid rgba(255,255,255,.13); font-size:13px; color:#7C8AA0; display:flex; flex-wrap:wrap; gap:8px 20px; justify-content:center;}
+
+@media(max-width:900px){
+  .qrow,.qhead{grid-template-columns:1fr; gap:8px;} .qhead{display:none;}
+  .tiers{grid-template-columns:1fr;}
+  .cases{grid-template-columns:1fr;}
+  .fsplit{grid-template-columns:1fr;}
+  .ev2{grid-template-columns:1fr;}
+  .biz{grid-template-columns:1fr;}
+  .built{grid-template-columns:1fr;}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important;}
+  .rv{opacity:1; transform:none;}
+  .fork .past,.fork .f1,.fork .f2,.fork .f3{stroke-dashoffset:0;}
+  .fork .band{opacity:.13;} .fork .flab{opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <div class="badge"><span class="pulse"></span> <b>LabPulse Twin</b> · the layer added after evaluation feedback</div>
+    <h1><span class="k">What happens</span><br>if I do this?</h1>
+    <p class="tag">The question every lab asks daily, and <b>answers by guessing.</b></p>
+
+    <svg class="fork" viewBox="0 0 840 210" xmlns="http://www.w3.org/2000/svg" aria-label="One recorded past branching into three possible futures">
+      <rect class="band" x="420" y="40" width="420" height="120" rx="6"/>
+      <path class="past" d="M0 108 L60 104 L120 110 L180 103 L240 109 L300 102 L360 108 L420 104"/>
+      <path class="f1" d="M420 104 L510 98 L600 96 L700 92 L840 88"/>
+      <path class="f2" d="M420 104 L510 116 L600 128 L700 140 L840 152"/>
+      <path class="f3" d="M420 104 L510 108 L600 104 L700 110 L840 106"/>
+      <line class="nowline" x1="420" y1="26" x2="420" y2="182"/>
+      <circle cx="420" cy="104" r="5" fill="#fff"/>
+      <text class="lab" x="0" y="200">What was recorded</text>
+      <text class="lab" x="430" y="200">What could happen next</text>
+      <text class="flab" x="750" y="80" fill="#8B7BF0">service first</text>
+      <text class="flab" x="742" y="168" fill="#E8963C">double the load</text>
+      <text class="flab" x="770" y="99" fill="#E2604B">change nothing</text>
+    </svg>
+
+    <div class="metaline">
+      <span><b>Simulate</b> before you commit</span>
+      <span><b>Verify</b> the simulation on real hardware</span>
+      <span><b>Report</b> the decision with evidence</span>
+    </div>
+  </div>
+  <div class="scroller"><span>Scroll</span><i></i></div>
+</section>
+
+<!-- ==================== WHAT CHANGED ==================== -->
+<section class="band rv">
+  <div class="wrap">
+    <div class="eyebrow">What we added, and why</div>
+    <h2 class="sec">We could tell you a machine<br>was dying. Not what to do about it.</h2>
+    <p class="lede">Our first build watched instruments and warned when something was going wrong. Good, but incomplete. Two evaluators pushed on the same soft spot from different directions, and both were right: a warning does not change a decision. So we built the layer that does.</p>
+
+    <div class="qhead"><span>The question</span><span>Which layer answers it</span><span>What the customer actually does</span></div>
+    <div class="qrows">
+      <div class="qrow rv" data-d="1">
+        <div class="qq">What is happening right now?</div>
+        <div class="ql">Monitoring &mdash; we had this</div>
+        <div class="qd">Watches a dashboard. Useful, but nothing changes today because of it.</div>
+      </div>
+      <div class="qrow rv" data-d="2">
+        <div class="qq">What will happen next?</div>
+        <div class="ql">Prediction &mdash; we had this</div>
+        <div class="qd">Panics earlier. Better than panicking late, but still waiting for something to go wrong.</div>
+      </div>
+      <div class="qrow key rv" data-d="3">
+        <div class="qq">What happens if I do this?</div>
+        <div class="ql">The twin &mdash; the new layer</div>
+        <div class="qd">Tests the decision in software first. Changes the plan before the samples, the money or the schedule are committed.</div>
+      </div>
+    </div>
+
+    <div class="punch rv">The first two move the alarm earlier. <b>Only the third changes what somebody does.</b></div>
+  </div>
+</section>
+
+<!-- ==================== THE THREE TIERS ==================== -->
+<section class="band dark rv">
+  <div class="wrap">
+    <div class="eyebrow on-dark">How it is built</div>
+    <h2 class="sec">Three tiers, and each one<br>exists for a different reason.</h2>
+    <p class="lede">This is the part that makes the twin believable rather than a nice animation. We validate the engine on hardware we can touch, then apply the same engine to instruments we cannot.</p>
+
+    <div class="tiers">
+      <div class="tier rv" data-d="1">
+        <div class="tn">Tier 1</div>
+        <h4>Twin Verified</h4>
+        <div class="sub">real machine + digital twin</div>
+        <p>An instrumented motor on the bench, streaming live. We predict, then induce the fault physically and check whether reality lands where the model said it would.</p>
+        <div class="job">Its job is <b>proof</b>. Without it, everything else is a simulation nobody has to believe.</div>
+      </div>
+      <div class="tier rv" data-d="2">
+        <div class="tn">Tier 2</div>
+        <h4>Twin Sim</h4>
+        <div class="sub">digital only, any instrument</div>
+        <p>Full 3D models of HPLC systems, spectrometers and other instruments. Nobody will let us induce a fault on a working analyser, and nobody can put one on a demo table.</p>
+        <div class="job">Its job is <b>reach</b>. The same engine, on instruments we will never physically hold.</div>
+      </div>
+      <div class="tier rv" data-d="3">
+        <div class="tn">Tier 3</div>
+        <h4>Twin Lab</h4>
+        <div class="sub">experiment before you commit</div>
+        <p>A sandbox where a lab tests a change first: a software update, a heavier schedule, a new method, a long campaign. Every session ends in a verdict and a report, not a shrug.</p>
+        <div class="job">Its job is <b>value</b>. This is the tier a customer pays for.</div>
+      </div>
+    </div>
+
+    <div class="punch rv" style="background:rgba(255,255,255,.06);">The engine is validated on hardware we can touch, then applied to instruments we cannot. <b>That order matters.</b></div>
+  </div>
+</section>
+
+<!-- ==================== THE FOUR QUESTIONS ==================== -->
+<section class="band paper rv">
+  <div class="wrap">
+    <div class="eyebrow">What you can actually ask it</div>
+    <h2 class="sec">Four real decisions,<br>made badly today.</h2>
+    <p class="lede">A sandbox with no question is a toy. So the lab is built around the decisions labs already make on instinct, each one ending in an answer you can file.</p>
+
+    <div class="cases">
+      <div class="case rv" data-d="1">
+        <div class="cn">01</div>
+        <h4>Can I take this vendor update?</h4>
+        <p>A third-party add-on ships a new version. Today you either install it and hope, or freeze the version for a year. Both are bad answers.</p>
+        <div class="out">Replay the new version against archived runs<br>&rarr; per-instrument verdict, before it touches hardware</div>
+      </div>
+      <div class="case rv" data-d="2">
+        <div class="cn">02</div>
+        <h4>Will this run actually finish?</h4>
+        <p>A 96 hour panel with 312 patient samples is about to start. The instrument looks fine. Looking fine is not the same as surviving four days under load.</p>
+        <div class="out">Completion probability, dominant risk component<br>&rarr; service first, or start with confidence</div>
+      </div>
+      <div class="case rv" data-d="3">
+        <div class="cn">03</div>
+        <h4>What does this method change cost me?</h4>
+        <p>Higher flow rate, harsher buffer, longer gradient. Everyone knows it wears the instrument faster. Nobody knows by how much until the parts start failing.</p>
+        <div class="out">Column, seal and lamp life consumed per method<br>&rarr; the true cost of a method, before you adopt it</div>
+      </div>
+      <div class="case rv" data-d="4">
+        <div class="cn">04</div>
+        <h4>Can one instrument carry this campaign?</h4>
+        <p>Eight weeks of work, one machine or two. Today this is decided by whoever sounds most confident in the meeting.</p>
+        <div class="out">Both plans projected side by side<br>&rarr; failure dates, total cost, risk of missing the deadline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== VERSION SANDBOX ==================== -->
+<section class="band dark rv">
+  <div class="wrap">
+    <div class="eyebrow on-dark">Built and working</div>
+    <h2 class="sec">Version Compatibility Sandbox</h2>
+    <p class="lede">This one came straight out of the second evaluation. An instrument runs a third-party add-on module. When that vendor ships an update, results can shift in ways nobody catches until the data is already out. Validating it properly means re-running standards on every instrument: days of machine time, columns and reference material spent. So most labs skip it, or freeze the version and fall behind.</p>
+
+    <div class="fsplit">
+      <div class="steplist">
+        <div class="sstep rv" data-d="1"><div class="sn">01</div><div class="sb">Take the lab's <b>archived runs from the approved version</b> — the golden set. It already exists, sitting in their records.</div></div>
+        <div class="sstep rv" data-d="2"><div class="sn">02</div><div class="sb">Replay the candidate version against those same inputs, <b>entirely in software</b>. No instrument time, no columns, no sample.</div></div>
+        <div class="sstep rv" data-d="3"><div class="sn">03</div><div class="sb">Compare every metric that matters — retention time, peak area, resolution, tailing, signal to noise, integration boundaries, classification agreement — <b>against the lab's own acceptance limits</b>.</div></div>
+        <div class="sstep rv" data-d="4"><div class="sn">04</div><div class="sb">Return a verdict <b>per instrument, not per version</b>. Compatibility depends on configuration, so the same update can be safe on one machine and wrong on the next.</div></div>
+        <div class="sstep rv" data-d="5"><div class="sn">05</div><div class="sb">Pin the failing instruments to the previous version, and generate <b>the evidence to send the vendor</b> — every failing metric against its limit.</div></div>
+      </div>
+
+      <div class="matrix rv" data-d="2">
+        <div class="mrow"><div><div class="mi">HPLC-01 to 04, 10</div><div class="mc">2998 PDA · firmware D-3400</div></div><span class="tagx ok">Compatible</span></div>
+        <div class="mrow"><div><div class="mi">HPLC-05, 06</div><div class="mc">2489 UV · C8 column</div></div><span class="tagx ok">Conditional</span></div>
+        <div class="mrow"><div><div class="mi">HPLC-07, 08, 09</div><div class="mc">2487 UV · firmware D-2100 · high salt</div></div><span class="tagx no">Not compatible</span></div>
+        <div class="mnote">The failures are not random. All three share one configuration — the new baseline detection opens the integration window early on noisier detectors, absorbing part of the neighbouring peak. <b>Seven instruments take the update. Three stay pinned, with evidence.</b></div>
+      </div>
+    </div>
+
+    <div class="punch rv" style="background:rgba(255,255,255,.06);">Days of instrument time, replaced by a replay that costs nothing. <b>And a rollback you can justify in writing.</b></div>
+  </div>
+</section>
+
+<!-- ==================== EVIDENCE ==================== -->
+<section class="band rv">
+  <div class="wrap">
+    <div class="eyebrow">Why anyone should believe it</div>
+    <h2 class="sec">A twin that cannot be checked<br>is just a story.</h2>
+    <p class="lede">So we built the two views that check it. One replays what actually happened. The other keeps score on us.</p>
+
+    <div class="ev2">
+      <div class="evc rv" data-d="1">
+        <h4>Time machine</h4>
+        <p>Drag any instrument back through ninety days of stored telemetry and watch the failure develop. Stop on the day drift began and you see a machine that looked completely normal to the operator — while the twin was already counting down. The prediction it issued that day is shown in its own words, next to what actually happened.</p>
+        <div class="stat2">
+          <div class="s"><div class="sv tw">23</div><div class="sl">days between drift onset and the threshold alarm</div></div>
+          <div class="s"><div class="sv tw">90</div><div class="sl">days replayable, second by second</div></div>
+        </div>
+      </div>
+      <div class="evc rv" data-d="2">
+        <h4>Accuracy scoreboard</h4>
+        <p>Every prediction the twin has ever made, listed with what actually happened — including the ones we got wrong, why we got them wrong, and what we changed afterwards. We publish a probability band rather than a single date, so we also publish how often reality landed inside it.</p>
+        <div class="stat2">
+          <div class="s"><div class="sv tl">76%</div><div class="sl">hit rate on resolved predictions</div></div>
+          <div class="s"><div class="sv tl">29</div><div class="sl">days median warning</div></div>
+          <div class="s"><div class="sv tl">79%</div><div class="sl">landed inside the band, against a target of 80%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="punch rv">Four predictions on that board are failures, shown in red with the reason. <b>Nobody publishes their own error rate. That is exactly why it is worth publishing.</b></div>
+  </div>
+</section>
+
+<!-- ==================== BUSINESS ==================== -->
+<section class="band dark rv">
+  <div class="wrap">
+    <div class="eyebrow on-dark">Why this is a product and not a feature</div>
+    <h2 class="sec">The same engine sells<br>to both sides of the room.</h2>
+    <p class="lede">An instrument maker does not primarily earn from the box. The durable revenue is service contracts and consumables. A twin serves both at once, which is why it works as a subscription add-on rather than a line item.</p>
+
+    <div class="biz">
+      <div class="bz rv" data-d="1">
+        <div class="bn">Value one</div>
+        <h4>It forecasts consumables before they are consumed</h4>
+        <p>Column, seal and lamp life are not spent by time, they are spent by workload. Tell the twin the plan and it tells you the parts. The lab stops running out mid campaign, and the manufacturer gets a demand signal per instrument instead of a reorder call.</p>
+      </div>
+      <div class="bz rv" data-d="2">
+        <div class="bn">Value two</div>
+        <h4>It protects the sample, not just the machine</h4>
+        <p>On a multi-day immunology panel the downtime cost is almost irrelevant next to what is loaded inside. Patient samples cannot be re-collected. The real question is whether the run finishes — and that is a question worth paying to answer.</p>
+      </div>
+      <div class="bz rv" data-d="3">
+        <div class="bn">Value three</div>
+        <h4>It defends the service contract</h4>
+        <p>Renewal stops being an argument about visit counts. It becomes a document: here is what your fleet will need next year, here is the risk if you skip it, here is the evidence behind both.</p>
+      </div>
+    </div>
+
+    <div class="codebox rv">Planned: <b>620 injections over 8 weeks, high salt buffer, 90% of max pressure</b>
+<em>→</em> pump seal life consumed  <b>71%</b>   replacement due week 6
+<em>→</em> column life consumed     <b>88%</b>   one column required by week 7
+<em>→</em> lamp hours consumed      <b>340 h</b>  no action this quarter
+<em>→</em> probability the campaign completes without intervention  <b>82%</b></div>
+
+    <div class="punch rv" style="background:rgba(255,255,255,.06);">A twin that forecasts wear is a twin that forecasts parts. <b>One subscription protects the customer's uptime and predicts the maker's revenue.</b></div>
+  </div>
+</section>
+
+<!-- ==================== WHAT WE BUILT ==================== -->
+<section class="band paper rv">
+  <div class="wrap">
+    <div class="eyebrow teal">Where we are today</div>
+    <h2 class="sec">What is built, honestly.</h2>
+
+    <div class="built">
+      <div class="bi rv" data-d="1"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">Instrumented hardware twin</div><div class="bb">Live sensor node on a real motor, streaming vibration, temperature and current. Faults induced on demand and predicted before they are induced.</div></div></div>
+      <div class="bi rv" data-d="2"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">3D instrument simulator</div><div class="bb">HPLC and analyser models with a physics-driven state, so faults can be explored on instruments we cannot physically access.</div></div></div>
+      <div class="bi rv" data-d="3"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">Version compatibility sandbox</div><div class="bb">Fleet replay, per-instrument verdicts, version pinning, validation report and a vendor revert request with the failing evidence attached.</div></div></div>
+      <div class="bi rv" data-d="4"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">Time machine and scoreboard</div><div class="bb">Ninety days replayable per instrument, and a public record of every prediction with its outcome, including the misses.</div></div></div>
+      <div class="bi rv" data-d="5"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">The monitoring layer underneath</div><div class="bb">Health scores, alerts, WhatsApp tickets, NFC instrument records, complaint handling and audit trail — the original product, still the foundation.</div></div></div>
+      <div class="bi rv" data-d="6"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div><div class="bt">Reports at the end of every path</div><div class="bb">Each simulation, validation and prediction ends in a document a lab can file, attach to a purchase request, or show in an audit.</div></div></div>
+    </div>
+
+    <div class="honest rv">
+      <b>What is not real yet, said plainly.</b> The golden sets and the ninety day histories in these demos are synthetic. The engine, the comparisons and the reports are real and running. What turns this from a working prototype into a validated product is one thing we cannot generate ourselves: archived runs and service history from a real instrument family. That is our ask, and it is a small one.
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CLOSE ==================== -->
+<section class="close rv">
+  <div class="wrap">
+    <h2>Everyone can tell you a machine is <em>degrading</em>.</h2>
+    <p class="sub">We let you ask what happens before you commit the samples, the money or the schedule — and then we show you the same prediction being checked against real hardware, and the scoreboard of every time we were wrong.</p>
+    <div class="pills">
+      <span>Simulate before you commit</span>
+      <span>Verified on real hardware</span>
+      <span>Per-instrument, not per-version</span>
+      <span>Forecasts parts, not just faults</span>
+      <span>Every path ends in a report</span>
+      <span>Sells as a subscription add-on</span>
+    </div>
+    <div class="sig2">
+      <span><b>LabPulse Twin</b> · Smartronics Technology, Pune</span>
+      <span>Problem Statement SH-HLT-03</span>
+      <span>Team SHIH26-TID-375</span>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in');}); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+  els.forEach(function(e){ io.observe(e); });
+})();
+</script>
+</body>
+</html>
